@@ -1,6 +1,13 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
+def createWindow(image, title = 'Image'): # 創建一個圖形窗口並顯示原圖
+    plt.figure()
+    plt.imshow(image, cmap='gray')
+    plt.title(title)
+    plt.xticks([]), plt.yticks([])
+    
 def apply_black_dot_filter(image_path, bright_spots):
     # 加載圖片
     image = cv2.imread(image_path, 0)
@@ -29,11 +36,15 @@ def apply_black_dot_filter(image_path, bright_spots):
     filtered_image_path = 'filtered_image.png'
     cv2.imwrite(filtered_image_path, img_back)
     
-    return filtered_image_path
+    return fshift_filtered, filtered_image_path
+
 # 使用者提供的亮點座標
 bright_spots = [[321, 109], [238, 171], [404, 171], [155, 236], [486, 236], [238, 297], [404, 298], [321, 359]]
 
 # 將過濾器應用於圖片（請將'input_image.png'替換為您的圖片文件路徑）
-filtered_image_path = apply_black_dot_filter('input_image/image1.jpg', bright_spots)
+fshift_filtered, filtered_image_path = apply_black_dot_filter('input_image/image1.jpg', bright_spots)
+
+createWindow(fshift_filtered, title = 'Filtered Frequency Domain') # 顯示過濾後的頻域表示
+plt.show()
 
 print(f"過濾後的圖片已保存為 {filtered_image_path}.")

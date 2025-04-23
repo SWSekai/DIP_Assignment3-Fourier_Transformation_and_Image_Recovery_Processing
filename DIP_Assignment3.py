@@ -32,6 +32,8 @@ def gaussianFilter(image, sigma = 10, img_notch = None):
     mask = np.exp(-(x**2 + y**2) / (2 * sigma**2)) # 高斯函數
     mask = mask / mask.max()
     mask = np.repeat(mask[:, :, np.newaxis], 2, axis = 2)  # 重複以匹配通道數
+    
+    return mask
 
     # filtered_image = image * mask
 
@@ -58,3 +60,5 @@ if __name__ == "__main__":
 
     # 顯示所有圖形窗口
     plt.show()
+    
+    print("mask:{}".format(gaussianFilter(magnitude_spectrum, sigma=10, img_notch = img_point)))
