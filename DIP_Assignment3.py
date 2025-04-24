@@ -130,3 +130,11 @@ if __name__ == "__main__":
     
     # 顯示所有圖形窗口
     plt.show()
+    
+    # 將圖片存入output_image資料夾
+    cv2.imwrite('output_image/image' + num + '_filtered.jpg', img_filtered)
+    cv2.imwrite('output_image/image' + num + '_magnitude_spectrum.jpg', magnitude_spectrum)
+    cv2.imwrite('output_image/image' + num + '_phase_spectrum.jpg', phase_spectrum)
+    cv2.imwrite('output_image/image' + num + '_filtered.jpg', img_filtered)
+    cv2.imwrite('output_image/image' + num + '_magnitude_spectrum_after.jpg', magnitude_spectrum_after)
+    cv2.imwrite('output_image/image' + num + '_phase_spectrum_after.jpg', phase_spectrum_after)
