@@ -20,8 +20,6 @@ def alterFourierTransform(f_shift): # 進行反傅立葉轉換
     img_processed = cv2.magnitude(img_processed[:, :, 0], img_processed[:, :, 1])
     
     return img_processed
-    
-    return img_processed
 
 def createWindow(image = None, title = None): # 創建一個圖形視窗
     plt.figure(figsize=(10, 6)) # 創建一個圖形視窗
@@ -45,14 +43,13 @@ def selfBuiltFilter(f_shift, img_notch = None, radius = 10, mode = "notch"):
     mask = np.ones((rows, cols, 2), np.float32)
 
     for (x, y) in img_notch:
-        # 注意：這裡已修正為 [x, y] → [col, row] → [y, x]
-        rr, cc = np.ogrid[:rows, :cols]
+        rr, cc = np.ogrid[:rows, :cols] # 創建網格坐標，rr和cc分別表示行和列的坐標
         dist = (rr - y) ** 2 + (cc - x) ** 2
 
         if mode == "notch":
             mask[dist <= radius ** 2] = 0
         elif mode == "gaussian":
-            gaussian = 1 - np.exp(-(dist) / (2 * (radius ** 2)))
+            gaussian = 1 - np.exp(-(dist) / (radius ** 2))
             mask[:, :, 0] *= gaussian
             mask[:, :, 1] *= gaussian
 
@@ -70,16 +67,39 @@ def selfBuiltFilter(f_shift, img_notch = None, radius = 10, mode = "notch"):
 
 if __name__ == "__main__":
     
-    img = cv2.imread('input_image/image1.jpg', 0)  # 以灰度模式讀取圖像
+    num = input("Please enter the image number (1 or 2): ")
+    img = cv2.imread('input_image/image'+ num + '.jpg', 0)  # 以灰度模式讀取圖像
     
-    img_point = [[321, 109], 
-                 [238, 171], [404, 171], 
-                 [155, 236], [486, 236], 
-                 [238, 297], [404, 298],
-                 [321, 359]]
+    img_points = {
+        "img1_point": (
+            (321, 109),
+            (238, 171), (404, 171),
+            (155, 236), (486, 236),
+            (238, 297), (404, 298),
+            (321, 359)
+        ),
+        "img2_point": (
+            (200, 135), (200, 265), (200, 395), (200, 525),
+            (300, 65), (300, 200), (300, 330), (300, 465), (300, 600),
+            (400, 135), (400, 265), (400, 395), (400, 525),
+            (500, 65), (500, 200), (500, 330), (500, 465), (500, 600),
+            (600, 135), (600, 265), (600, 395), (600, 525),
+            (700, 65), (700, 200), (700, 330), (700, 465), (700, 600),
+            (800, 135), (800, 265), (800, 395), (800, 525),
+            (900, 65), (900, 200), (900, 330), (900, 465), (900, 600),
+        )
+    }
+    key = "img" + num + "_point"
+    
+    if key in img_points:
+        selected_points = img_points[key]
+        print(f"更換成{key}的標點: {selected_points}")
+    else:
+        print("Invalid image number.")
+        exit(1)
 
     f_shift, magnitude_spectrum, phase_spectrum = FourierTransform(img)
-    magnitude_spectrum_filtered = selfBuiltFilter(f_shift, img_notch=img_point, radius=10, mode='gaussian')
+    magnitude_spectrum_filtered = selfBuiltFilter(f_shift, img_notch=selected_points, mode='gaussian')
     img_filtered = alterFourierTransform(magnitude_spectrum_filtered) # 進行反傅立葉轉換
     _, magnitude_spectrum_filtered, phase_spectrum_filtered = FourierTransform(img_filtered) # 重新計算濾波後的振幅頻譜和相位頻譜
     
