@@ -38,7 +38,7 @@ def createWindow(image = None, title = None): # 創建一個圖形視窗
     
     plt.xticks([]), plt.yticks([]) # 隱藏坐標軸刻度
 
-def selfBuiltFilter(f_shift, img_notch = None, radius = 10, mode = "notch"):
+def selfBuiltFilter(f_shift, img_notch = None, radius = 20, mode = "notch"):
     rows, cols = f_shift.shape[:2]
     mask = np.ones((rows, cols, 2), np.float32)
 
@@ -64,6 +64,15 @@ def selfBuiltFilter(f_shift, img_notch = None, radius = 10, mode = "notch"):
         #     mask[:, :, 1] *= gaussian_sym
 
     return f_shift * mask
+
+def normalize_and_save(filename, image): # 將圖像正規化並保存
+    """
+    OpenCV 的 cv2.imwrite() 只支援 uint8 或 uint16。
+    如果丟入的是 float32 類型或數值超出 0–255 範圍，會自動做轉換。
+    """
+    norm_img = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
+    norm_img = np.uint8(norm_img)
+    cv2.imwrite(filename, norm_img)
 
 if __name__ == "__main__":
     
@@ -100,7 +109,7 @@ if __name__ == "__main__":
         exit(1)
 
     f_shift, magnitude_spectrum, phase_spectrum = FourierTransform(img)
-    f_filtered = selfBuiltFilter(f_shift, img_notch=selected_points, radius=10, mode='gaussian') # 濾波器遮罩
+    f_filtered = selfBuiltFilter(f_shift, img_notch=selected_points, radius=5, mode='notch') # 濾波器遮罩
     img_filtered = alterFourierTransform(f_filtered) # 進行反傅立葉轉換
     _, magnitude_spectrum_after, phase_spectrum_after = FourierTransform(img_filtered) # 重新計算濾波後的振幅頻譜和相位頻譜
     
@@ -120,7 +129,7 @@ if __name__ == "__main__":
     plt.subplot(133).imshow(phase_spectrum, cmap='gray'), plt.title("Phase Spectrum"), plt.xticks([]), plt.yticks([])
     
     createWindow(title="Filtered Image")
-    plt.subplot(131), plt.imshow(img_filtered, cmap='gray'), plt.title('Filtered Image'), plt.xticks([]), plt.yticks([])
+    plt.subplot(131), plt.imshow(img_filtered, cmap='gray'), plt.title('Filtered Image'), plt.xticks([]), plt.yticks([]) 
     plt.subplot(132), plt.imshow(magnitude_spectrum_after, cmap='gray'), plt.title("Filtered Magnitude Spectrum"), plt.xticks([]), plt.yticks([])
     plt.subplot(133), plt.imshow(phase_spectrum_after, cmap='gray'), plt.title("Filtered Phase Spectrum"), plt.xticks([]), plt.yticks([])
     
@@ -132,9 +141,8 @@ if __name__ == "__main__":
     plt.show()
     
     # 將圖片存入output_image資料夾
-    cv2.imwrite('output_image/image' + num + '_filtered.jpg', img_filtered)
-    cv2.imwrite('output_image/image' + num + '_magnitude_spectrum.jpg', magnitude_spectrum)
-    cv2.imwrite('output_image/image' + num + '_phase_spectrum.jpg', phase_spectrum)
-    cv2.imwrite('output_image/image' + num + '_filtered.jpg', img_filtered)
-    cv2.imwrite('output_image/image' + num + '_magnitude_spectrum_after.jpg', magnitude_spectrum_after)
-    cv2.imwrite('output_image/image' + num + '_phase_spectrum_after.jpg', phase_spectrum_after)
+    normalize_and_save('output_image/image' + num + '_magnitude_spectrum.jpg', magnitude_spectrum)
+    normalize_and_save('output_image/image' + num + '_phase_spectrum.jpg', phase_spectrum)
+    normalize_and_save('output_image/image' + num + '_filtered.jpg', img_filtered)
+    normalize_and_save('output_image/image' + num + '_magnitude_spectrum_after.jpg', magnitude_spectrum_after)
+    normalize_and_save('output_image/image' + num + '_phase_spectrum_after.jpg', phase_spectrum_after)
