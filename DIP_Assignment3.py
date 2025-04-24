@@ -49,7 +49,7 @@ def selfBuiltFilter(f_shift, img_notch = None, radius = 10, mode = "notch"):
         if mode == "notch":
             mask[dist <= radius ** 2] = 0
         elif mode == "gaussian":
-            gaussian = 1 - np.exp(-(dist) / (radius ** 2))
+            gaussian = 1 - np.exp(- (dist) / (2 * (radius ** 2)))
             mask[:, :, 0] *= gaussian
             mask[:, :, 1] *= gaussian
 
@@ -79,35 +79,40 @@ if __name__ == "__main__":
             (321, 359)
         ),
         "img2_point": (
-            (200, 135), (200, 265), (200, 395), (200, 525),
+            (100, 65), (100, 200), (100, 330), (100, 465), (100, 600),
+            (200, 135), (200, 265), (200, 395), (200, 525), (200, 665),
             (300, 65), (300, 200), (300, 330), (300, 465), (300, 600),
-            (400, 135), (400, 265), (400, 395), (400, 525),
-            (500, 65), (500, 200), (500, 330), (500, 465), (500, 600),
-            (600, 135), (600, 265), (600, 395), (600, 525),
+            (400, 135), (400, 265), (400, 395), (400, 525), (400, 665),
+            (500, 65), (500, 200), (500, 465), (500, 600),
+            (600, 135), (600, 265), (600, 395), (600, 525), (600, 665),
             (700, 65), (700, 200), (700, 330), (700, 465), (700, 600),
-            (800, 135), (800, 265), (800, 395), (800, 525),
+            (800, 135), (800, 265), (800, 395), (800, 525), (800, 665),
             (900, 65), (900, 200), (900, 330), (900, 465), (900, 600),
+            (1000, 135), (1000, 265), (1000, 395), (1000, 525), (1000, 665)
         )
     }
     key = "img" + num + "_point"
     
     if key in img_points:
         selected_points = img_points[key]
-        print(f"更換成{key}的標點: {selected_points}")
     else:
         print("Invalid image number.")
         exit(1)
 
     f_shift, magnitude_spectrum, phase_spectrum = FourierTransform(img)
-    magnitude_spectrum_filtered = selfBuiltFilter(f_shift, img_notch=selected_points, mode='gaussian')
-    img_filtered = alterFourierTransform(magnitude_spectrum_filtered) # 進行反傅立葉轉換
-    _, magnitude_spectrum_filtered, phase_spectrum_filtered = FourierTransform(img_filtered) # 重新計算濾波後的振幅頻譜和相位頻譜
+    f_filtered = selfBuiltFilter(f_shift, img_notch=selected_points, radius=10, mode='gaussian') # 濾波器遮罩
+    img_filtered = alterFourierTransform(f_filtered) # 進行反傅立葉轉換
+    _, magnitude_spectrum_after, phase_spectrum_after = FourierTransform(img_filtered) # 重新計算濾波後的振幅頻譜和相位頻譜
     
     # createWindow(img)  # 顯示原圖
     # createWindow(magnitude_spectrum, "Magnitude Spectrum")  # 顯示原振幅頻譜
     # createWindow(phase_spectrum, "Phase Spectrum")  # 顯示原相位頻譜
     # createWindow(magnitude_spectrum_filtered, "Filtered Magnitude Spectrum")  # 顯示濾波後的振幅頻譜
     # createWindow(img_filtered, "Filtered Image")  # 顯示濾波後的圖像
+    
+    # 除錯用（可選）：顯示濾波器遮罩
+    # mask = selfBuiltFilter(f_shift, img_notch=selected_points, radius=10, mode='notch')
+    # createWindow(mask[:, :, 0], "Filter Mask")
     
     createWindow(title="Original Image")
     plt.subplot(131), plt.imshow(img, cmap='gray'), plt.title('Input Image'), plt.xticks([]), plt.yticks([])
@@ -116,8 +121,8 @@ if __name__ == "__main__":
     
     createWindow(title="Filtered Image")
     plt.subplot(131), plt.imshow(img_filtered, cmap='gray'), plt.title('Filtered Image'), plt.xticks([]), plt.yticks([])
-    plt.subplot(132), plt.imshow(magnitude_spectrum_filtered, cmap='gray'), plt.title("Filtered Magnitude Spectrum"), plt.xticks([]), plt.yticks([])
-    plt.subplot(133), plt.imshow(phase_spectrum_filtered, cmap='gray'), plt.title("Filtered Phase Spectrum"), plt.xticks([]), plt.yticks([])
+    plt.subplot(132), plt.imshow(magnitude_spectrum_after, cmap='gray'), plt.title("Filtered Magnitude Spectrum"), plt.xticks([]), plt.yticks([])
+    plt.subplot(133), plt.imshow(phase_spectrum_after, cmap='gray'), plt.title("Filtered Phase Spectrum"), plt.xticks([]), plt.yticks([])
     
     createWindow(title="Filtered Image Comparison")
     plt.subplot(121), plt.imshow(img, cmap='gray'), plt.title('Input Image'), plt.xticks([]), plt.yticks([])
