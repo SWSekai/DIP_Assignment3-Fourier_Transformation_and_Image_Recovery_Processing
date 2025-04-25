@@ -2,7 +2,10 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-def FourierTransform(image): # 進行傅立葉轉換
+def FourierTransform(image):
+    """
+    進行傅立葉轉換
+    """
     dft = cv2.dft(np.float32(image), flags=cv2.DFT_COMPLEX_OUTPUT)
     dft_shift = np.fft.fftshift(dft)
 
@@ -14,15 +17,21 @@ def FourierTransform(image): # 進行傅立葉轉換
 
     return dft_shift, magnitude_spectrum, phase_spectrum
 
-def alterFourierTransform(f_shift): # 進行反傅立葉轉換
+def alterFourierTransform(f_shift): 
+    """
+    進行反傅立葉轉換
+    """
     f_ishift = np.fft.ifftshift(f_shift)
     img_processed = cv2.idft(f_ishift)
     img_processed = cv2.magnitude(img_processed[:, :, 0], img_processed[:, :, 1])
     
     return img_processed
 
-def createWindow(image = None, title = None): # 創建一個圖形視窗
-    plt.figure(figsize=(10, 6)) # 創建一個圖形視窗
+def createWindow(image = None, title = None): 
+    """
+    創建一個圖形視窗
+    """
+    plt.figure(figsize=(10, 6))
     
     if image is not None:
         plt.imshow(image, cmap='gray')
@@ -39,6 +48,9 @@ def createWindow(image = None, title = None): # 創建一個圖形視窗
     plt.xticks([]), plt.yticks([]) # 隱藏坐標軸刻度
 
 def selfBuiltFilter(f_shift, img_notch = None, radius = 20, mode = "notch"):
+    """
+    自建方法:notch, gaussian選擇
+    """
     rows, cols = f_shift.shape[:2]
     mask = np.ones((rows, cols, 2), np.float32)
 
@@ -53,7 +65,7 @@ def selfBuiltFilter(f_shift, img_notch = None, radius = 20, mode = "notch"):
             mask[:, :, 0] *= gaussian
             mask[:, :, 1] *= gaussian
 
-        # 若尚未手動標記對稱點，可打開以下註解自動處理對稱點
+        # 自動處理對稱點
         # y_sym, x_sym = rows - y, cols - x
         # dist_sym = (rr - y_sym) ** 2 + (cc - x_sym) ** 2
         # if mode == "notch":
@@ -65,14 +77,15 @@ def selfBuiltFilter(f_shift, img_notch = None, radius = 20, mode = "notch"):
 
     return f_shift * mask
 
-def normalize_and_save(filename, image): # 將圖像正規化並保存
+def normalize_and_save(filename, image): 
     """
-    OpenCV 的 cv2.imwrite() 只支援 uint8 或 uint16。
-    如果丟入的是 float32 類型或數值超出 0–255 範圍，會自動做轉換。
+    將圖像正規化並保存
+    OpenCV 的 cv2.imwrite() 只支援 uint8 或 uint16
+    如果丟入的是 float32 類型或數值超出 0-255 範圍，會自動做轉換
     """
-    norm_img = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
-    norm_img = np.uint8(norm_img)
-    cv2.imwrite(filename, norm_img)
+    normalized_img = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
+    normalized_img = np.uint8(normalized_img)
+    cv2.imwrite(filename, normalized_img)
 
 if __name__ == "__main__":
     
